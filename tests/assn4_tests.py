@@ -1,29 +1,29 @@
-import time
-import requests
+# import time
+# import requests
 
-BASE1 = "http://localhost:5001"
-BASE2 = "http://localhost:5002"
+# BASE1 = "http://localhost:5001"
+# BASE2 = "http://localhost:5002"
 
-def wait_up(base):
-    for _ in range(40):
-        try:
-            requests.get(base)
-            return
-        except:
-            time.sleep(0.5)
-    raise RuntimeError("Service not up")
+# def wait_up(base):
+#     for _ in range(40):
+#         try:
+#             requests.get(base)
+#             return
+#         except:
+#             time.sleep(0.5)
+#     raise RuntimeError("Service not up")
 
-def test_flow():
-    wait_up(BASE1)
-    wait_up(BASE2)
+# def test_flow():
+#     wait_up(BASE1)
+#     wait_up(BASE2)
 
-    r1 = requests.post(BASE1 + "/pet-types", json={"type":"Australian Shepherd"})
-    assert r1.status_code == 201
-    pid = r1.json()["id"]
+#     r1 = requests.post(BASE1 + "/pet-types", json={"type":"Australian Shepherd"})
+#     assert r1.status_code == 201
+#     pid = r1.json()["id"]
 
-    r2 = requests.get(f"{BASE1}/pet-types/{pid}")
-    assert r2.status_code == 200
-    # assert r2.status_code == 404
+#     r2 = requests.get(f"{BASE1}/pet-types/{pid}")
+#     assert r2.status_code == 200
+#     # assert r2.status_code == 404
 
 # - Tester test file -
 
@@ -332,3 +332,162 @@ def test_flow():
 #         assert isinstance(data2, list), "Response should be an array"
 #         # Store 2 should have 3 Canidae types (Golden Retriever, Australian Shepherd, bulldog)
 #         assert len(data2) == 3, f"Expected 3 Canidae types in store 2, got {len(data2)}"
+
+
+# - tester pytest file for checking query.txt file -
+
+import pytest
+import requests
+import json
+
+# Base URLs for the pet store instances
+PET_STORE_1_URL = "http://localhost:5001"
+PET_STORE_2_URL = "http://localhost:5002"
+PET_ORDER_URL = "http://localhost:5003"
+
+# Pet Type Payloads
+PET_TYPE1 = {
+    "type": "Golden Retriever"
+}
+
+PET_TYPE2 = {
+    "type": "Australian Shepherd"
+}
+
+PET_TYPE3 = {
+    "type": "Abyssinian"
+}
+
+PET_TYPE4 = {
+    "type": "bulldog"
+}
+
+# Pet Payloads
+PET1_TYPE1 = {
+    "name": "Lander",
+    "birthdate": "14-05-2020"
+}
+
+PET2_TYPE1 = {
+    "name": "Lanky"
+}
+
+PET3_TYPE1 = {
+    "name": "Shelly",
+    "birthdate": "07-07-2019"
+}
+
+PET4_TYPE2 = {
+    "name": "Felicity",
+    "birthdate": "27-11-2011"
+}
+
+PET5_TYPE3 = {
+    "name": "Muscles"
+}
+
+PET6_TYPE3 = {
+    "name": "Junior"
+}
+
+PET7_TYPE4 = {
+    "name": "Lazy",
+    "birthdate": "07-08-2018"
+}
+
+PET8_TYPE4 = {
+    "name": "Lemon",
+    "birthdate": "27-03-2020"
+}
+
+# Global variables to store IDs
+pet_type_ids = {}
+
+
+def test_01_post_pet_types_to_store1():
+    """POST 3 pet-types to pet-store #1"""
+    global pet_type_ids
+    
+    # POST PET_TYPE1 to store 1
+    response1 = requests.post(f"{PET_STORE_1_URL}/pet-types", json=PET_TYPE1)
+    data1 = response1.json()
+    pet_type_ids['id_1'] = data1["id"]
+    
+    # POST PET_TYPE2 to store 1
+    response2 = requests.post(f"{PET_STORE_1_URL}/pet-types", json=PET_TYPE2)
+    data2 = response2.json()
+    pet_type_ids['id_2'] = data2["id"]
+    
+    # POST PET_TYPE3 to store 1
+    response3 = requests.post(f"{PET_STORE_1_URL}/pet-types", json=PET_TYPE3)
+    data3 = response3.json()
+    pet_type_ids['id_3'] = data3["id"]
+
+
+def test_02_post_pet_types_to_store2():
+    """POST 3 pet-types to pet-store #2"""
+    global pet_type_ids
+    
+    # POST PET_TYPE1 to store 2
+    response4 = requests.post(f"{PET_STORE_2_URL}/pet-types", json=PET_TYPE1)
+    data4 = response4.json()
+    pet_type_ids['id_4'] = data4["id"]
+    
+    # POST PET_TYPE2 to store 2
+    response5 = requests.post(f"{PET_STORE_2_URL}/pet-types", json=PET_TYPE2)
+    data5 = response5.json()
+    pet_type_ids['id_5'] = data5["id"]
+    
+    # POST PET_TYPE4 to store 2
+    response6 = requests.post(f"{PET_STORE_2_URL}/pet-types", json=PET_TYPE4)
+    data6 = response6.json()
+    pet_type_ids['id_6'] = data6["id"]
+
+
+def test_03_post_pets_to_store1_type1():
+    """POST 2 pets to pet-store #1 pet-type id_1"""
+    id_1 = pet_type_ids['id_1']
+    
+    # POST PET1_TYPE1
+    requests.post(f"{PET_STORE_1_URL}/pet-types/{id_1}/pets", json=PET1_TYPE1)
+    
+    # POST PET2_TYPE1
+    requests.post(f"{PET_STORE_1_URL}/pet-types/{id_1}/pets", json=PET2_TYPE1)
+
+
+def test_04_post_pets_to_store1_type3():
+    """POST 2 pets to pet-store #1 pet-type id_3"""
+    id_3 = pet_type_ids['id_3']
+    
+    # POST PET5_TYPE3
+    requests.post(f"{PET_STORE_1_URL}/pet-types/{id_3}/pets", json=PET5_TYPE3)
+    
+    # POST PET6_TYPE3
+    requests.post(f"{PET_STORE_1_URL}/pet-types/{id_3}/pets", json=PET6_TYPE3)
+
+
+def test_05_post_pet_to_store2_type1():
+    """POST 1 pet to pet-store #2 pet-type id_4"""
+    id_4 = pet_type_ids['id_4']
+    
+    # POST PET3_TYPE1
+    requests.post(f"{PET_STORE_2_URL}/pet-types/{id_4}/pets", json=PET3_TYPE1)
+
+
+def test_06_post_pet_to_store2_type2():
+    """POST 1 pet to pet-store #2 pet-type id_5"""
+    id_5 = pet_type_ids['id_5']
+    
+    # POST PET4_TYPE2
+    requests.post(f"{PET_STORE_2_URL}/pet-types/{id_5}/pets", json=PET4_TYPE2)
+
+
+def test_07_post_pets_to_store2_type4():
+    """POST 2 pets to pet-store #2 pet-type id_6"""
+    id_6 = pet_type_ids['id_6']
+    
+    # POST PET7_TYPE4
+    requests.post(f"{PET_STORE_2_URL}/pet-types/{id_6}/pets", json=PET7_TYPE4)
+    
+    # POST PET8_TYPE4
+    requests.post(f"{PET_STORE_2_URL}/pet-types/{id_6}/pets", json=PET8_TYPE4)
